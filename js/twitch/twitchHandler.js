@@ -2,7 +2,7 @@ class TwitchHandler extends Handler {
   /**
    * Create a new Timer handler.
    */
-  constructor() {
+  constructor(channelId) {
     super('Twitch', ['OnChannelPoint', 'OnCommunityGoalStart', 'OnCommunityGoalProgress', 'OnCommunityGoalComplete', 'OnHypeTrainStart', 'OnHypeTrainEnd', 'OnHypeTrainLevel', 'OnHypeTrainProgress', 'OnHypeTrainConductor', 'OnHypeTrainCooldownExpired']);
     this.rewards = [];
     this.rewardsTrigger = {};
@@ -34,18 +34,13 @@ class TwitchHandler extends Handler {
       'BITS': ''
     }
 
-    this.init.bind(this);
     this.onMessage.bind(this);
     this.onChannelPointMessage.bind(this);
     this.onCommunityGoalMessage.bind(this);
     this.onHypeTrainMessage.bind(this);
-  }
 
-  /**
-   * Initialize the oauth tokens
-   */
-  async init(channelId) {
     connectPubSubWebsocket(channelId, this.onMessage.bind(this));
+
   }
 
   /**
@@ -133,10 +128,8 @@ class TwitchHandler extends Handler {
       console.error('Twitch Message: ' + JSON.stringify(message));
     }
     if (message.data) {
-      var data = JSON.parse(message.data);
-      if (data.type === 'RESPONSE' && data.error === '') {
-        this.success();
-      } else if (data.type == 'MESSAGE' && data.data.topic.startsWith('community-points-channel-v1.')) {
+      var data = JSON.parse(message.data);      
+      if (data.type == 'MESSAGE' && data.data.topic.startsWith('community-points-channel-v1.')) {
         var dataMessage = JSON.parse(data.data.message);
         if (dataMessage.type === 'reward-redeemed') {
           this.onChannelPointMessage(dataMessage);
@@ -183,7 +176,7 @@ class TwitchHandler extends Handler {
     if (onChannelPointTriggers.length > 0) {
       onChannelPointTriggers.sort((a,b) => a-b);
       onChannelPointTriggers.forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           reward: reward,
           user: user,
           message: input,
@@ -224,7 +217,7 @@ class TwitchHandler extends Handler {
       if (goalTriggers.length > 0) {
         goalTriggers.sort((a,b) => a-b);
         goalTriggers.forEach(triggerId => {
-          controller.handleData(triggerId, {
+          this.controllerHandleData(triggerId, {
             goal: goal,
             user: message.data.contribution.user.display_name,
             amount: message.data.contribution.amount,
@@ -253,7 +246,7 @@ class TwitchHandler extends Handler {
       if (goalTriggers.length > 0) {
         goalTriggers.sort((a,b) => a-b);
         goalTriggers.forEach(triggerId => {
-          controller.handleData(triggerId, {
+          this.controllerHandleData(triggerId, {
             goal: goal,
             data: message
           });
@@ -274,14 +267,14 @@ class TwitchHandler extends Handler {
       };
       // Handle triggers
       this.hypeTrainsTrigger['start'].forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           data: message.data
         });
       });
     } else if (message.type === 'hype-train-end') {
       // Handle triggers
       this.hypeTrainsTrigger['end'].forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           sub_conductor_id: this.currentConductor['SUBS'],
           cheer_conductor_id: this.currentConductor['BITS'],
           data: message.data
@@ -291,7 +284,7 @@ class TwitchHandler extends Handler {
       // Handle triggers
       this.currentConductor[message.data.source] = message.data.user.id;
       this.hypeTrainsTrigger['conductor'].forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           sub_conductor_id: this.currentConductor['SUBS'],
           cheer_conductor_id: this.currentConductor['BITS'],
           type: message.data.source,
@@ -301,7 +294,7 @@ class TwitchHandler extends Handler {
     } else if (message.type === 'hype-train-progression') {
       // Handle triggers
       this.hypeTrainsTrigger['progress'].forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           user_id: message.data.user_id,
           level: message.data.progress.level.value,
           progress: message.data.progress.total,
@@ -313,7 +306,7 @@ class TwitchHandler extends Handler {
     } else if (message.type === 'hype-train-level-up') {
       // Handle triggers
       this.hypeTrainsTrigger['level'].forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           level: message.data.progress.level.value,
           progress: message.data.progress.total,
           total: message.data.progress.level.goal,
@@ -323,19 +316,8 @@ class TwitchHandler extends Handler {
       });
     } else if (message.type === 'hype-train-cooldown-expiration') {
       this.hypeTrainsTrigger['cooldown'].forEach(triggerId => {
-        controller.handleData(triggerId);
+        this.controllerHandleData(triggerId);
       });
     }
   }
 }
-
-/**
- * Create a handler
- */
-async function twitchHandlerExport() {
-  var twitch = new TwitchHandler();
-  var user = await readFile('settings/twitch/user.txt');
-  var id = await getIdFromUser(user.trim());
-  twitch.init(id.trim());
-}
-twitchHandlerExport();

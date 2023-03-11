@@ -4,7 +4,6 @@ class ApiHandler extends Handler {
    */
   constructor() {
     super('API', []);
-    this.success();
     this.apiCall = {};
 
     this.initialize.bind(this);
@@ -115,11 +114,3 @@ class ApiHandler extends Handler {
     return response;
   }
 }
-
-/**
- * Create a handler
- */
-function apiHandlerExport() {
-  var api = new ApiHandler();
-}
-apiHandlerExport();

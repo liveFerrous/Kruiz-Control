@@ -7,8 +7,6 @@ class CooldownHandler extends Handler {
   */
   constructor() {
     super('Cooldown', []);
-    this.success();
-
     this.cooldowns = {};
   }
 
@@ -113,11 +111,3 @@ class CooldownHandler extends Handler {
     return response;
   }
 }
-
-/**
-* Create a handler
-*/
-function cooldownHandlerExport() {
-  var cooldown = new CooldownHandler();
-}
-cooldownHandlerExport();

@@ -17,7 +17,6 @@
   };
 
   socket.onopen = () => {
-    slobsHandler.success();
     slobsSocket.sendSLOBS("auth", "TcpServerService", [token])
     slobsSocket.sendSLOBS("getScenes", "ScenesService");
     slobsSocket.sendSLOBS("activeScene", "ScenesService");

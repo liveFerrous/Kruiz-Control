@@ -3,6 +3,7 @@ class Controller {
    * Create a new controller.
    */
   constructor() {
+    this.parserName = 'controller';
     this.parsers = {};
     this.triggers = {};
     this.triggerCount = 0;
@@ -12,10 +13,11 @@ class Controller {
     this.successful = [];
     this.initTriggers = [];
     this.playAudio = {};
-    this.addParser('controller', this);
     this.addTrigger('OnInit', 'controller');
     this.addSuccess('controller');
     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    this.handleData = this.handleData.bind(this);
   }
 
   /**
@@ -23,8 +25,17 @@ class Controller {
    * @param {string} name name to use for the parser
    * @param {Handler} instance parser object to add
    */
-  addParser(name, instance) {
-    this.parsers[name.toLowerCase()] = instance;
+  addParser(instance) {
+    const parserName = instance.parserName.toLowerCase();
+    this.parsers[parserName] = instance;
+
+    if (instance.triggers) {
+      instance.triggers.forEach(trigger => {
+        this.addTrigger(trigger, parserName);
+      });
+    }
+
+    this.addSuccess(parserName);
   }
 
   /**

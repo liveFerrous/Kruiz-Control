@@ -7,7 +7,6 @@ class DiscordHandler extends Handler {
     this.webhookUrls = {};
     this.webhookMessageIds = {};
     this.webhooks = {};
-    this.success();
 
     this.initialize.bind(this);
   }
@@ -173,11 +172,3 @@ class DiscordHandler extends Handler {
     }
   }
 }
-
-/**
- * Create a handler
- */
-function discordHandlerExport() {
-  var discord = new DiscordHandler();
-}
-discordHandlerExport();

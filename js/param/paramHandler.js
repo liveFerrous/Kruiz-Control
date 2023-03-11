@@ -4,7 +4,6 @@ class ParamHandler extends Handler {
    */
   constructor() {
     super('Param', []);
-    this.success();
   }
 
   /**
@@ -114,10 +113,3 @@ class ParamHandler extends Handler {
   }
 }
 
-/**
- * Create a handler
- */
-function paramHandlerExport() {
-  var param = new ParamHandler();
-}
-paramHandlerExport();

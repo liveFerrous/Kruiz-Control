@@ -7,7 +7,6 @@ class ListHandler extends Handler {
    */
   constructor() {
     super('List', []);
-    this.success();
     this.lists = {};
 
     this.initialize.bind(this);
@@ -249,10 +248,3 @@ class ListHandler extends Handler {
   }
 }
 
-/**
- * Create a handler
- */
-function listHandlerExport() {
-  var list = new ListHandler();
-}
-listHandlerExport();

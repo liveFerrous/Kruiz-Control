@@ -6,7 +6,6 @@ class ActionHandler extends Handler {
     super('Action', ['OnAction']);
     this.actions = [];
     this.actionsTriggers = {};
-    this.success();
   }
 
   /**
@@ -55,11 +54,3 @@ class ActionHandler extends Handler {
     }
   }
 }
-
-/**
- * Create a handler
- */
-function actionHandlerExport() {
-  var actionHandler = new ActionHandler();
-}
-actionHandlerExport();

@@ -2,7 +2,7 @@ class OBSHandler extends Handler {
   /**
    * Create a new OBS handler.
    */
-  constructor() {
+  constructor(obs, currentScene) {
     super('OBS', ['OnOBSSwitchScenes', 'OnOBSTransitionTo', 'OnOBSStreamStarted', 'OnOBSStreamStopped', 'OnOBSCustomMessage', 'OnOBSSourceVisibility', 'OnOBSSourceFilterVisibility']);
     this.onSwitch = [];
     this.onSwitchTrigger = {};
@@ -21,19 +21,16 @@ class OBSHandler extends Handler {
     this.currentScene = "unset";
 
     this.setCurrentScene.bind(this);
-    this.init.bind(this);
-  }
+    this.obs = obs;
 
-  /**
-   * Initialize the connection to obs with the input settings.
-   * @param {string} address obs websocket address
-   * @param {string} password obs websocket password
-   */
-  init(address, password) {
-    this.obs = connectOBSWebsocket(
-      address, password, this, this.onSwitchScenes.bind(this), this.onTransitionBegin.bind(this), this.onStreamStateChange.bind(this),
-      this.onCustomMessage.bind(this), this.onSourceVisibility.bind(this), this.onSourceFilterVisibility.bind(this)
-    );
+    this.obs.on('CurrentProgramSceneChanged', this.onSwitchScenes.bind(this));
+    this.obs.on('SceneTransitionStarted', this.onTransitionBegin.bind(this));
+    this.obs.on('StreamStateChanged', this.onStreamStateChange.bind(this));
+    this.obs.on('CustomEvent', this.onCustomMessage.bind(this));
+    this.obs.on('SceneItemEnableStateChanged', this.onSourceVisibility.bind(this));
+    this.obs.on('SourceFilterEnableStateChanged', this.onSourceFilterVisibility.bind(this));
+
+    this.setCurrentScene(currentScene);
   }
 
   /**
@@ -165,7 +162,7 @@ class OBSHandler extends Handler {
     if (sceneTriggers.length > 0) {
       sceneTriggers.sort((a,b) => a-b);
       sceneTriggers.forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           scene: currentScene
         });
       });
@@ -193,7 +190,7 @@ class OBSHandler extends Handler {
     if (sceneTriggers.length > 0) {
       sceneTriggers.sort((a,b) => a-b);
       sceneTriggers.forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           from: this.currentScene,
           scene: toScene
         });
@@ -212,13 +209,13 @@ class OBSHandler extends Handler {
     }
     if (data.outputState === "OBS_WEBSOCKET_OUTPUT_STARTED" && this.onStartTrigger.length > 0) {
       this.onStartTrigger.forEach(trigger => {
-        controller.handleData(trigger);
+        this.controllerHandleData(trigger);
       })
     }
 
     if (data.outputState === "OBS_WEBSOCKET_OUTPUT_STOPPED" && this.onStopTrigger.length > 0) {
       this.onStopTrigger.forEach(trigger => {
-        controller.handleData(trigger);
+        this.controllerHandleData(trigger);
       })
     }
   }
@@ -241,7 +238,7 @@ class OBSHandler extends Handler {
     if (customTriggers.length > 0) {
       customTriggers.sort((a,b) => a-b);
       customTriggers.forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           message: broadcast.data.message,
           data: broadcast.data.data
         });
@@ -277,7 +274,7 @@ class OBSHandler extends Handler {
     if (sourceTriggers.length > 0) {
       sourceTriggers.sort((a,b) => a-b);
       sourceTriggers.forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           visible: visibility
         });
       });
@@ -308,7 +305,7 @@ class OBSHandler extends Handler {
     if (sourceTriggers.length > 0) {
       sourceTriggers.sort((a,b) => a-b);
       sourceTriggers.forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.handleData(triggerId, {
           visible: visibility
         });
       });
@@ -330,7 +327,6 @@ class OBSHandler extends Handler {
       case 'currentscene':
         var currentScene = await this.obs.getCurrentScene();
         return {current_scene: currentScene};
-        break;
       case 'flip':
         var { scene, source, direction } = Parser.getInputs(triggerData, ['action', 'scene', 'source', 'direction']);
         var { sceneItemTransform } = await this.obs.getSceneItemTransform(scene, source);
@@ -348,12 +344,10 @@ class OBSHandler extends Handler {
         }
         var visible = await this.obs.getSourceVisibility(scene, source);
         return { is_visible: !!visible };
-        break;
       case 'issourceactive':
         var { source } = Parser.getInputs(triggerData, ['action', 'source']);
         var is_active = await this.obs.getSourceActiveStatus(source);
         return { is_active };
-        break;
       case 'media':
         var { media, source, path } = Parser.getInputs(triggerData, ['action', 'media', 'source', 'path'], false, 1);
         let mediaAction = '';
@@ -412,7 +406,6 @@ class OBSHandler extends Handler {
           init_x: data.x,
           init_y: data.y
         }
-        break;
       case 'refresh':
         var { source } = Parser.getInputs(triggerData, ['action', 'source']);
         var source = triggerData.slice(2).join(' ');
@@ -434,7 +427,6 @@ class OBSHandler extends Handler {
         var currentScene = await this.obs.getCurrentScene();
         await this.obs.setCurrentScene(scene);
         return {previous_scene: currentScene};
-        break;
       case 'scenesource':
         var { scene, source, status } = Parser.getInputs(triggerData, ['action', 'scene', 'source', 'status']);
         status = status.toLowerCase();
@@ -463,7 +455,6 @@ class OBSHandler extends Handler {
           init_width: data.width,
           init_height: data.height
         }
-        break;
       case 'source':
         var { source, subaction, info, status } = Parser.getInputs(triggerData, ['action', 'source', 'subaction', 'info', 'status'], false, 2);
         var sourceSettings = {};
@@ -513,7 +504,6 @@ class OBSHandler extends Handler {
           output_skipped_frames: data.outputSkippedFrames,
           data: data
         }
-        break;
       case 'stopreplaybuffer':
         await this.obs.stopReplayBuffer();
         break;
@@ -529,11 +519,9 @@ class OBSHandler extends Handler {
         var { transition } = Parser.getInputs(triggerData, ['action', 'transition']);
         await this.obs.setCurrentTransition(transition);
         return { previous_transition: currentTransition };
-        break;
       case 'version':
         var data = await this.obs.getVersion();
         return { version: data.obsWebSocketVersion };
-        break;
       case 'volume':
         var { source, volume, useDecibel } = Parser.getInputs(triggerData, ['action', 'source', 'volume', 'useDecibel'], false, 1);
         useDecibel = (useDecibel && useDecibel.toLowerCase() === 'true') ? true : false;
@@ -559,7 +547,6 @@ class OBSHandler extends Handler {
           console.error('Unable to parse volume value: ' + triggerData[triggerData.length - 1]);
         }
         return { previous_volume: (useDecibel === true) ? currentAudio.inputVolumeDb : currentAudio.inputVolumeMul };
-        break;
       default:
         console.error(`Unable to determine the OBS <action> to be taken. Found: "${action}" within ${JSON.stringify(triggerData)}.`);
         break;
@@ -567,14 +554,3 @@ class OBSHandler extends Handler {
     return;
   }
 }
-
-/**
- * Create a handler and read user settings
- */
-async function obsHandlerExport() {
-  var obsHandler = new OBSHandler();
-  var address = await readFile('settings/obs/address.txt');
-  var password = await readFile('settings/obs/password.txt');
-  obsHandler.init(address.trim(), password.trim());
-}
-obsHandlerExport();

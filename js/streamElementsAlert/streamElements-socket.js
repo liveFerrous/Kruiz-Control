@@ -12,7 +12,6 @@ function connectStreamElementsWebsocket(streamElementHandler, token, onTestEvent
   // Socket connected
   socket.on('connect', function() {
     console.log('Successfully connected to the streamelements websocket');
-    streamElementHandler.success();
     socket.emit('authenticate', {
         method: 'jwt',
         token: token

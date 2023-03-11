@@ -2,7 +2,7 @@ class StreamlabsHandler extends Handler {
   /**
    * Create a new Streamlabs handler.
    */
-  constructor() {
+  constructor(socketToken) {
     super('Streamlabs', ['OnSLTwitchBits','OnSLDonation','OnSLTiltifyDonation','OnSLPatreonPledge','OnSLTwitchFollow','OnSLTwitchGiftSub','OnSLTwitchCommunityGiftSub','OnSLTwitchHost','OnSLTwitchRaid','OnSLTwitchSub','OnSLTwitchBitsNoSync','OnSLDonationNoSync','OnSLTiltifyDonationNoSync','OnSLPatreonPledgeNoSync','OnSLTwitchFollowNoSync','OnSLTwitchGiftSubNoSync','OnSLTwitchCommunityGiftSubNoSync','OnSLTwitchHostNoSync','OnSLTwitchRaidNoSync','OnSLTwitchSubNoSync']);
     this.alerts = [];
     this.alertsTrigger = {
@@ -68,14 +68,6 @@ class StreamlabsHandler extends Handler {
     this.alertIdsNoSync = [];
     this.onSLMessageQueue = async.queue(this.parseStreamlabsMessage.bind(this), 1);
 
-    this.init.bind(this);
-  }
-
-  /**
-   * Initialize the connection to streamlabs with the input token.
-   * @param {string} socketToken streamlabs socket api token
-   */
-  init(socketToken) {
     connectStreamlabsWebsocket(this, socketToken, this.onStreamlabsMessage.bind(this));
   }
 
@@ -125,7 +117,7 @@ class StreamlabsHandler extends Handler {
         if (this.alerts.indexOf(type) != -1) {
           var params = this.eventHandlers[type](message.message);
           this.alertsTrigger[type].forEach(triggerId => {
-            controller.handleData(triggerId, params);
+            this.controllerHandleData(triggerId, params);
           });
         }
       }
@@ -141,7 +133,7 @@ class StreamlabsHandler extends Handler {
           }
           var params = this.eventHandlers[type](alertMessage);
           this.alertsNoSyncTrigger[type].forEach(triggerId => {
-            controller.handleData(triggerId, params);
+            this.controllerHandleData(triggerId, params);
           });
         }
       });
@@ -313,13 +305,3 @@ class StreamlabsHandler extends Handler {
     }
   }
 }
-
-/**
- * Create a handler and read user settings
- */
-async function streamlabsHandlerExport() {
-  var streamlabs = new StreamlabsHandler();
-  var socket = await readFile('settings/streamlabs/socketAPIToken.txt');
-  streamlabs.init(socket.trim());
-}
-streamlabsHandlerExport();

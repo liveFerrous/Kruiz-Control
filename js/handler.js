@@ -6,20 +6,8 @@ class Handler {
    */
   constructor(parserName, triggers) {
     this.parserName = parserName;
-    triggers = triggers || [];
-
-    // Configure handler with controller
-    controller.addParser(parserName, this);
-    triggers.forEach(trigger => {
-      controller.addTrigger(trigger, parserName);
-    });
-  }
-
-  /**
-   * Register trigger as successfully initialized.
-   */
-  success() {
-    controller.addSuccess(this.parserName);
+    this.triggers = triggers || [];
+    this.addDataHandler.bind(this);
   }
 
   /**
@@ -30,6 +18,10 @@ class Handler {
    */
   addTriggerData(trigger, triggerLine, triggerId) {
     return;
+  }
+
+  addDataHandler(dataHandler) {
+    this.controllerHandleData = dataHandler;
   }
 
   /**

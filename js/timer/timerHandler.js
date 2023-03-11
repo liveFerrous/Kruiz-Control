@@ -4,7 +4,6 @@ class TimerHandler extends Handler {
    */
   constructor() {
     super('Timer', ['OnTimer']);
-    this.success();
     this.timerNames = [];
     this.timers = {};
     this.intervals = {};
@@ -51,7 +50,7 @@ class TimerHandler extends Handler {
         var triggerId = info[0];
         var interval = info[2];
         this.intervals[name][i] = setInterval(function() {
-          controller.handleData(triggerId);
+          this.controllerHandleData(triggerId);
         }, interval * 1000);
       }, this);
     } else if (action === 'stop') {
@@ -74,7 +73,7 @@ class TimerHandler extends Handler {
         var offset = timer[3];
         setTimeout(function() {
           this.intervals[name].push(setInterval(function() {
-            controller.handleData(triggerId);
+            this.controllerHandleData(triggerId);
           }, interval * 1000));
         }.bind(this), (offset + 1) * 1000);
       });
@@ -82,10 +81,3 @@ class TimerHandler extends Handler {
   }
 }
 
-/**
- * Create a handler
- */
-function timerHandlerExport() {
-  var timer = new TimerHandler();
-}
-timerHandlerExport();

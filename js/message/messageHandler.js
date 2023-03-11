@@ -4,7 +4,6 @@ class MessageHandler extends Handler {
    */
   constructor() {
     super('Message', ['OnMessage']);
-    this.success();
     this.messages = [];
     this.messagesTriggers = {};
   }
@@ -38,7 +37,7 @@ class MessageHandler extends Handler {
       data = data || '';
       if (this.messages.indexOf(message) !== -1) {
         this.messagesTriggers[message].forEach((triggerId) => {
-          controller.handleData(triggerId, {
+          this.controllerHandleData(triggerId, {
             message: message,
             data: data
           });
@@ -46,7 +45,7 @@ class MessageHandler extends Handler {
       }
       if (this.messages.indexOf('*') !== -1) {
         this.messagesTriggers['*'].forEach((triggerId) => {
-          controller.handleData(triggerId, {
+          this.controllerHandleData(triggerId, {
             message: message,
             data: data
           });
@@ -55,11 +54,3 @@ class MessageHandler extends Handler {
     }
   }
 }
-
-/**
- * Create a handler
- */
-function messageHandlerExport() {
-  var message = new MessageHandler();
-}
-messageHandlerExport();

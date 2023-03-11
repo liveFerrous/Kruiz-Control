@@ -2,24 +2,17 @@ class SLOBSHandler extends Handler {
   /**
    * Create a new SLOBS handler.
    */
-  constructor() {
+  constructor(token) {
     super('SLOBS', ['OnSLOBSSwitchScenes', 'OnSLOBSStreamStarted', 'OnSLOBSStreamStopped']);
     this.onSwitch = [];
     this.onSwitchTrigger = {};
     this.onStartTrigger = [];
     this.onStopTrigger = [];
 
-    this.init.bind(this);
     this.onSwitchScenes.bind(this);
     this.onStreamStart.bind(this);
     this.onStreamStop.bind(this);
-  }
 
-  /**
-   * Initialize the connection to SLOBS with the input settings.
-   * @param {string} token slobs api token
-   */
-  init(token) {
     this.slobs = connectSLOBSWebsocket(
       this,
       token,
@@ -75,7 +68,7 @@ class SLOBSHandler extends Handler {
     if (sceneTriggers.length > 0) {
       sceneTriggers.sort((a,b) => a-b);
       sceneTriggers.forEach(triggerId => {
-        controller.handleData(triggerId, {
+        this.controllerHandleData(triggerId, {
           scene: data.name
         });
       });
@@ -88,7 +81,7 @@ class SLOBSHandler extends Handler {
   onStreamStart() {
     if (this.onStartTrigger.length > 0) {
       this.onStartTrigger.forEach(trigger => {
-        controller.handleData(trigger);
+        this.controllerHandleData(trigger);
       })
     }
   }
@@ -99,7 +92,7 @@ class SLOBSHandler extends Handler {
   onStreamStop() {
     if (this.onStopTrigger.length > 0) {
       this.onStopTrigger.forEach(trigger => {
-        controller.handleData(trigger);
+        this.controllerHandleData(trigger);
       })
     }
   }
@@ -200,13 +193,3 @@ class SLOBSHandler extends Handler {
     return;
   }
 }
-
-/**
- * Create a handler.
- */
-async function slobsHandlerExport() {
-  var slobsHandler = new SLOBSHandler();
-  var token = await readFile('settings/slobs/token.txt');
-  slobsHandler.init(token.trim());
-}
-slobsHandlerExport();

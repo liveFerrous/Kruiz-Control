@@ -4,7 +4,6 @@ class RandomHandler extends Handler {
    */
   constructor() {
     super('Random', []);
-    this.success();
   }
 
   /**
@@ -70,11 +69,3 @@ class RandomHandler extends Handler {
     }
   }
 }
-
-/**
- * Create a handler
- */
-function randomHandlerExport() {
-  var random = new RandomHandler();
-}
-randomHandlerExport();

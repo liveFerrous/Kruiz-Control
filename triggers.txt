@@ -4,5 +4,8 @@ Chat Send "Kruiz Control Initialized"
 OnCommand b 0 !example
 Chat Send "Success! It worked!"
 
+OnCommand b 0 !testRandom
+Custom RandomPhoto Bird testImage 6000 10000 100
+
 OnCommand b 0 !kcreset
 Reset

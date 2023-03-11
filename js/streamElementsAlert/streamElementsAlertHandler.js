@@ -2,7 +2,7 @@ class StreamElementsAlertHandler extends Handler {
   /**
    * Create a new StreamElements Alert handler.
    */
-   constructor() {
+   constructor(jwtToken) {
     super('StreamElementsAlert',['OnSETwitchBits','OnSETwitchBulkGiftSub','OnSEDonation','OnSETwitchFollow','OnSETwitchGiftSub','OnSETwitchHost','OnSETwitchRaid','OnSETwitchSub']);
     this.alerts = [];
     this.alertsTrigger = {
@@ -46,16 +46,9 @@ class StreamElementsAlertHandler extends Handler {
       'subscriber-latest': 'subscriber'
     };
 
-    this.init.bind(this);
     this.onStreamElementsTestMessage.bind(this);
     this.onStreamElementsMessage.bind(this);
-  }
 
-  /**
-   * Initialize the connection to streamelements with the input token.
-   * @param {string} jwtToken streamelements jwt token
-   */
-  init(jwtToken) {
     connectStreamElementsWebsocket(this, jwtToken, this.onStreamElementsTestMessage.bind(this), this.onStreamElementsMessage.bind(this));
   }
 
@@ -92,7 +85,7 @@ class StreamElementsAlertHandler extends Handler {
     if (this.alerts.indexOf(type) != -1) {
       var params = this.eventHandlers[type](message.event);
       this.alertsTrigger[type].forEach(triggerId => {
-        controller.handleData(triggerId, params);
+        this.controllerHandleData(triggerId, params);
       });
     }
   }
@@ -116,7 +109,7 @@ class StreamElementsAlertHandler extends Handler {
     if (this.alerts.indexOf(type) != -1) {
       var params = this.eventHandlers[type](message.data);
       this.alertsTrigger[type].forEach(triggerId => {
-        controller.handleData(triggerId, params);
+        this.controllerHandleData(triggerId, params);
       });
     }
   }
@@ -221,13 +214,3 @@ class StreamElementsAlertHandler extends Handler {
     }
   }
 }
-
-/**
- * Create a handler and read user settings
- */
-async function streamElementsAlertHandlerExport() {
-  var streamElementsAlert = new StreamElementsAlertHandler();
-  var token = await readFile('settings/streamelements/jwtToken.txt');
-  streamElementsAlert.init(token.trim());
-}
-streamElementsAlertHandlerExport();

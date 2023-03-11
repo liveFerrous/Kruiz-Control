@@ -2,22 +2,13 @@
 * Connect to the OBS websocket and setup the event handlers
 * @param {string} address obs websocket address
 * @param {string} password obs websocket password
-* @param {Handler} obsHandler handler to mark successful initialization
-* @param {function} onSwitchScenes handle switch scene messages
-* @param {function} onTransitionBegin handle transition starts
-* @param {function} onStreamStateChange handle stream state change messages
-* @param {function} onCustomMessage handle custom messages
-* @param {function} onOBSSourceVisibility handle scene item visibility changes
-* @param {function} onOBSSourceFilterVisibility handle source filter visibility changes
 */
-function connectOBSWebsocket(address, password, obsHandler, onSwitchScenes, onTransitionBegin, onStreamStateChange, onCustomMessage, onOBSSourceVisibility, onOBSSourceFilterVisibility) {
-  var obs = new OBSWebSocket();
-  obs.connect(address, password).then(async () => {
+function connectOBSWebsocket(address, password) {
+  const obs = new OBSWebSocket();
+  const connectPromise = obs.connect(address, password).then(async () => {
     obs.getVersion().then(data => {
       console.error(`Kruiz Control connected to the OBS Websocket v${data.obsWebSocketVersion}`);
     });
-    obsHandler.setCurrentScene(await obs.getCurrentScene());
-    obsHandler.success();
   }).catch(err => { // Promise convention dictates you have a catch on every chain.
     console.error(JSON.stringify(err));
   });
@@ -37,13 +28,6 @@ function connectOBSWebsocket(address, password, obsHandler, onSwitchScenes, onTr
   obs.on('Exiting', function() {
     obs.disconnect();
   });
-
-  obs.on('CurrentProgramSceneChanged', onSwitchScenes);
-  obs.on('SceneTransitionStarted', onTransitionBegin);
-  obs.on('StreamStateChanged', onStreamStateChange);
-  obs.on('CustomEvent', onCustomMessage);
-  obs.on('SceneItemEnableStateChanged', onOBSSourceVisibility);
-  obs.on('SourceFilterEnableStateChanged', onOBSSourceFilterVisibility);
 
   obs.getInputSettings = async function(source) {
     return await this.call('GetInputSettings', {
@@ -520,5 +504,5 @@ function connectOBSWebsocket(address, password, obsHandler, onSwitchScenes, onTr
     });
   }
 
-  return obs;
+  return {obs, connectPromise};
 }

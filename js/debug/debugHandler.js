@@ -1,17 +1,18 @@
-class DebugHandler extends Handler {
+class Debug extends Handler {
+
+  static All = false;
+  static OBS = false;
+  static Parser = false;
+  static SLOBS = false;
+  static StreamElements = false;
+  static Streamlabs = false;
+  static Twitch = false;
+
   /**
    * Create a new Debug handler.
    */
   constructor() {
     super('Debug', []);
-    this.success();
-    this.All = false;
-    this.OBS = false;
-    this.Parser = false;
-    this.SLOBS = false;
-    this.StreamElements = false;
-    this.Streamlabs = false;
-    this.Twitch = false;
   }
 
   /**
@@ -24,39 +25,30 @@ class DebugHandler extends Handler {
       handler = handler.toLowerCase();
       switch (handler) {
         case 'obs':
-          this.OBS = true;
+          OBS = true;
           break;
         case 'parser':
-          this.Parser = true;
+          Parser = true;
           break;
         case 'slobs':
-          this.SLOBS = true;
+          SLOBS = true;
           break;
         case 'sl':
         case 'streamlabs':
-          this.Streamlabs = true;
+          Streamlabs = true;
           break;
         case 'se':
         case 'streamelements':
-          this.StreamElements = true;
+          StreamElements = true;
           break;
         case 'twitch':
-          this.Twitch = true;
+          Twitch = true;
           break;
         default:
           break;
       }
     } else {
-      this.All = true;
+      All = true;
     }
   }
 }
-
-/**
- * Create a handler
- */
-let Debug;
-function debugHandlerExport() {
-  Debug = new DebugHandler();
-}
-debugHandlerExport();

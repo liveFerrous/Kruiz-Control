@@ -1,8 +1,10 @@
 class ChatHandler extends Handler {
   /**
    * Create a new Chat handler.
+   * @param {string} user twitch channel to connect
+   * @param {string} oauth twitch irc oauth to send messages
    */
-  constructor() {
+  constructor(user) {
     super('Chat', ['OnCommand','OnKeyword','OnEveryChatMessage','OnSpeak']);
 
     /* OnCommand */
@@ -23,30 +25,10 @@ class ChatHandler extends Handler {
     /* OnEveryChatMessage */
     this.chatTriggers = [];
 
-    this.init.bind(this);
     this.checkPermissions.bind(this);
     this.onAllChat.bind(this);
-  }
 
-  /**
-   * Initialize the chat connection with the input user.
-   * @param {string} user twitch channel to connect
-   * @param {string} oauth twitch irc oauth to send messages
-   */
-  init(user, oauth) {
     this.channel = user.toLowerCase();
-    ComfyJS.onConnected = ( address, port, isFirstConnect ) => {
-      if (isFirstConnect) {
-        this.success();
-      }
-    }
-    if (user) {
-      if (oauth) {
-        ComfyJS.Init(user, oauth);
-      } else {
-        ComfyJS.Init(user);
-      }
-    }
   }
 
   /**
@@ -244,7 +226,7 @@ class ChatHandler extends Handler {
         }
         this.commandsInfo[command].forEach(info => {
           if (this.checkPermissions(user, flags, info.permission, extra.username, info.info) && this.updateCooldown(info)) {
-            controller.handleData(info.trigger, {
+            this.controllerHandleData(info.trigger, {
               command: command,
               user: user,
               message: combined,
@@ -275,7 +257,7 @@ class ChatHandler extends Handler {
           this.keywordsInfo[match].forEach(info => {
             // Check if user has permission to trigger keyword
             if (this.checkPermissions(user, flags, info.permission, extra.username, info.info) && this.updateCooldown(info)) {
-              controller.handleData(info.trigger, {
+              this.controllerHandleData(info.trigger, {
                 user: user,
                 keyword: match,
                 message: message,
@@ -317,7 +299,7 @@ class ChatHandler extends Handler {
         this.commandsInfo[command].forEach(info => {
           if (this.checkPermissions(user, flags, info.permission, extra.username, info.info) && this.updateCooldown(info)) {
             var after = args.join(' ');
-            controller.handleData(info.trigger, {
+            this.controllerHandleData(info.trigger, {
               command: command,
               user: user,
               message: message,
@@ -348,7 +330,7 @@ class ChatHandler extends Handler {
           this.keywordsInfo[match].forEach(info => {
             // Check if user has permission to trigger keyword
             if (this.checkPermissions(user, flags, info.permission, extra.username, info.info) && this.updateCooldown(info)) {
-              controller.handleData(info.trigger, {
+              this.controllerHandleData(info.trigger, {
                 user: user,
                 keyword: match,
                 message: message,
@@ -377,7 +359,7 @@ class ChatHandler extends Handler {
   onAllChat(user, data) {
     // OnEveryChatMessage
     this.chatTriggers.forEach(triggerId => {
-      controller.handleData(triggerId, data);
+      this.controllerHandleData(triggerId, data);
     });
 
     // Check for OnSpeak Event
@@ -393,21 +375,10 @@ class ChatHandler extends Handler {
       this.speakers[userLower] = true;
       onSpeakTriggers.sort((a, b) => a-b);
       onSpeakTriggers.forEach(triggerId => {
-        controller.handleData(triggerId, data);
+        this.controllerHandleData(triggerId, data);
       });
     } else if (this.speakers[userLower] === undefined) {
       this.speakers[userLower] = true;
     }
   }
 }
-
-/**
- * Create a handler and read user settings
- */
-async function chatHandlerExport() {
-  var chat = new ChatHandler();
-  var user = await readFile('settings/chat/user.txt');
-  var oauth = await readFile('settings/chat/oauth.txt');
-  chat.init(user.trim(), oauth.trim());
-}
-chatHandlerExport();

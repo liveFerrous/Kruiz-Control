@@ -10,7 +10,6 @@ function connectStreamlabsWebsocket(streamlabsAlertHandler, token, onEvent) {
 
   streamlabs.on('connect', function() {
     console.log('Successfully connected to the streamlabs websocket');
-    streamlabsAlertHandler.success();
   });
 
   streamlabs.onclose = function () {

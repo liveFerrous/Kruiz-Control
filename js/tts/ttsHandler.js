@@ -2,10 +2,10 @@ class TTSHandler extends Handler {
   /**
    * Create a new TTS handler.
    */
-  constructor() {
+  constructor(getParser) {
     super('TTS', []);
     this.voices = {};
-    this.success();
+    this.getParser = getParser;
   }
 
   /**
@@ -19,7 +19,7 @@ class TTSHandler extends Handler {
       window.speechSynthesis.cancel();
     } else if (action === 'voices') {
       var { name } = Parser.getInputs(triggerData, ['action', 'name']);
-      var listParser = controller.getParser("list");
+      var listParser = this.getParser("list");
       var voices = window.speechSynthesis.getVoices();
       if (voices.length === 0) {
         await timeout(1000);
@@ -110,10 +110,3 @@ class TTSHandler extends Handler {
   }
 }
 
-/**
- * Create a handler and read user settings
- */
-async function ttsHandlerExport() {
-  var ttsHandler = new TTSHandler();
-}
-ttsHandlerExport();
