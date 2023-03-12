@@ -1,5 +1,5 @@
 {
-    "rootImageFolder": "",
+    "rootImageFolder": "E:/dev/Kruiz-Control/images",
     "rootSoundFolder": "sounds",
     "typeSounds": {
         "Black Capped Chickadee": "BlackCappedChickadee.mp3",

@@ -81,7 +81,7 @@ class CustomHandler extends Handler {
           // example: Custom RandomPhoto MyScene Bird RandomImage RandomSound 5000
           const { type, obsImageSource, duration, volume } 
             = Parser.getInputs(triggerData, ['action', 'type', 'obsImageSource', 'duration', 'volume']);
-
+                      
           const randomFile = this.getRandomFile(type);
           await this.obs.setInputSettings(obsImageSource, {
             file: randomFile.imagePath
