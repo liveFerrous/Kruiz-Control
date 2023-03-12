@@ -1,0 +1,43 @@
+{
+    "rootImageFolder": "",
+    "rootSoundFolder": "sounds",
+    "typeSounds": {
+        "Black Capped Chickadee": "BlackCappedChickadee.mp3",
+        "Red Breasted Nuthatch": "RedBreastedNuthatch.mp3",
+        "White Breasted Nuthatch": "WhiteBreastedNuthatch.mp3",
+        "American Robin": "AmericanRobin.mp3"
+    },
+    "images": {
+        "bird": {
+            "folder": "Bird",
+            "images": [
+                {
+                    "image": "_DSC1106.jpg",
+                    "type": "Black Capped Chickadee"
+                },
+                {
+                    "image": "_DSC3847.jpg",
+                    "type": "Red Breasted Nuthatch",
+                    "message": "Test Custom Message"
+                },
+                {
+                    "image": "Breakfast.jpg",
+                    "type": "White Breasted Nuthatch"
+                },
+                {
+                    "image": "Robin Leaf Fest.jpg",
+                    "type": "American Robin"
+                }
+            ]
+        },
+        "rodent": {
+            "folder": "Rodent",
+            "images": [
+                {
+                    "image": "_DSC9266.jpg",
+                    "type": "Squirrel"
+                }
+            ]
+        }
+    }
+}
